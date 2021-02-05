@@ -196,7 +196,8 @@ for k in set_sigma:
                 z = Variable(torch.randn(num_img, z_dimension)).cuda()
                 fake_img, g_layer2, g_layer1 = G(z)
                 fake_out = D(fake_img)
-                d_loss_fake = criterion(fake_out, fake_label)
+                noise=get_noise(sigma)
+                d_loss_fake = criterion(fake_out, fake_label)+noise
                 fake_scores = fake_out  # closer to 0 means better
         
                 # bp and optimize
@@ -211,7 +212,7 @@ for k in set_sigma:
                 z = Variable(torch.randn(num_img, z_dimension)).cuda()
                 fake_img, _, _ = G(z)
                 output = D(fake_img)
-                noise=get_noise(sigma)
+
                 g_loss = criterion(output, real_label)+noise
         
                 # bp and optimize
