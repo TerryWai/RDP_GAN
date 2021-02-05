@@ -17,13 +17,13 @@ import os
 import copy
 import time
 
-batch_size = 1
+batch_size = 128
 num_epochs = 10000
 z_dimension = 100
 
 digits = [0]
 # Noise scale
-set_sigma = [1] 
+set_sigma = [0.1] 
 use_gpu = torch.cuda.is_available()
 # Image processing
 img_transform = transforms.Compose([
@@ -197,7 +197,8 @@ for k in set_sigma:
                 fake_img, g_layer2, g_layer1 = G(z)
                 fake_out = D(fake_img)
                 noise=get_noise(sigma)
-                d_loss_fake = criterion(fake_out, fake_label)+noise
+                #d_loss_fake = criterion(fake_out, fake_label)+noise
+				d_loss_fake = criterion(fake_out, fake_label)
                 fake_scores = fake_out  # closer to 0 means better
         
                 # bp and optimize
