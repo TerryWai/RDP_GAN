@@ -18,12 +18,12 @@ import copy
 import time
 
 batch_size = 128
-num_epochs = 10000
+num_epochs = 100
 z_dimension = 100
 
 digits = [0]
 # Noise scale
-set_sigma = [0.1] 
+set_sigma = [0.1, 1e10] 
 use_gpu = torch.cuda.is_available()
 # Image processing
 img_transform = transforms.Compose([
@@ -183,12 +183,13 @@ for k in set_sigma:
                 real_img = Variable(img).cuda()
                 real_label = Variable(torch.ones(num_img)).cuda()
                 fake_label = Variable(torch.zeros(num_img)).cuda()
-        
+
+                noise=get_noise(sigma)        
                 # compute loss of real_img
                 real_out = D(real_img)
                         
-                d_loss_real = criterion(real_out, real_label)
-                
+                #d_loss_real = criterion(real_out, real_label)
+                d_loss_real = criterion(real_out, real_label)+noise                
                 #d_loss_real=d_loss_real+noise
                 real_scores = real_out  # closer to 1 means better
         
@@ -196,9 +197,8 @@ for k in set_sigma:
                 z = Variable(torch.randn(num_img, z_dimension)).cuda()
                 fake_img, g_layer2, g_layer1 = G(z)
                 fake_out = D(fake_img)
-                noise=get_noise(sigma)
-                #d_loss_fake = criterion(fake_out, fake_label)+noise
-		d_loss_fake = criterion(fake_out, fake_label)
+
+                d_loss_fake = criterion(fake_out, fake_label)
                 fake_scores = fake_out  # closer to 0 means better
         
                 # bp and optimize
@@ -214,8 +214,8 @@ for k in set_sigma:
                 fake_img, _, _ = G(z)
                 output = D(fake_img)
 
-                g_loss = criterion(output, real_label)+noise
-        
+                # g_loss = criterion(output, real_label)+noise
+                g_loss = criterion(output, real_label)        
                 # bp and optimize
                 g_optimizer.zero_grad()
                 g_loss.backward()
@@ -261,7 +261,7 @@ for k in set_sigma:
                 real_images = to_img(real_img.cpu().data)
                 save_image(real_images, './loss_std{}/record-{}.png'.format(sigma,digit, epoch + 1))
         
-            if (epoch+1)%50 == 0:  
+            if (epoch+1)%10 == 0:  
                 fake_images = to_img(fake_img.cpu().data)
                 save_image(fake_images, './loss_std{}/fake_images_digit-{}-{}.png'.format(sigma,digit, epoch + 1))
       
