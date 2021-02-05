@@ -23,7 +23,7 @@ z_dimension = 100
 
 digits = [0]
 # Noise scale
-set_sigma = [0.1, 1e10] 
+set_sigma = [0.01, 1e10] 
 use_gpu = torch.cuda.is_available()
 # Image processing
 img_transform = transforms.Compose([
@@ -175,7 +175,6 @@ for k in set_sigma:
             eval_loss_fake, eval_loss_real = 0., 0.
             eval_acc_fake, eval_acc_real = 0. ,0.
             eval_acc_gan = 0.
-            
             for i, (img, label) in enumerate(dataloader):
                 num_img = img.size(0)
                 # =================train discriminator
@@ -188,8 +187,9 @@ for k in set_sigma:
                 # compute loss of real_img
                 real_out = D(real_img)
                         
-                #d_loss_real = criterion(real_out, real_label)
-                d_loss_real = criterion(real_out, real_label)+noise                
+                d_loss_real = criterion(real_out, real_label)
+                # value_d_loss_real = Variable(d_loss_real.float(), requires_grad=False)
+                # d_loss_real = d_loss_real*(noise+value_d_loss_real)/value_d_loss_real            
                 #d_loss_real=d_loss_real+noise
                 real_scores = real_out  # closer to 1 means better
         
@@ -203,6 +203,8 @@ for k in set_sigma:
         
                 # bp and optimize
                 d_loss = d_loss_real + d_loss_fake
+                value_d_loss = Variable(d_loss.float(), requires_grad=False)
+                d_loss = d_loss*(noise+value_d_loss)/value_d_loss  
                 d_optimizer.zero_grad()
                 d_loss.backward()
             
@@ -214,14 +216,15 @@ for k in set_sigma:
                 fake_img, _, _ = G(z)
                 output = D(fake_img)
 
-                # g_loss = criterion(output, real_label)+noise
-                g_loss = criterion(output, real_label)        
+                g_loss = criterion(output, real_label)
+                # value_g_loss = Variable(g_loss.float(), requires_grad=False)
+                # g_loss = g_loss*(noise+value_g_loss)/value_g_loss
                 # bp and optimize
                 g_optimizer.zero_grad()
                 g_loss.backward()
                 g_optimizer.step()
         
-                if (i + 1) % 5 == 0:
+                if (i + 1) % 500 == 0:
                     print('Epoch [{}/{}], d_loss: {:.6f}, g_loss: {:.6f} '
                           'D real: {:.6f}, D fake: {:.6f}'.format(
                               epoch, num_epochs, d_loss.item(), g_loss.item(),
