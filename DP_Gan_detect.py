@@ -23,7 +23,7 @@ z_dimension = 100
 
 digits = [0]
 # Noise scale
-set_sigma = [0] 
+set_sigma = [1] 
 use_gpu = torch.cuda.is_available()
 # Image processing
 img_transform = transforms.Compose([
@@ -32,9 +32,9 @@ img_transform = transforms.Compose([
 ])
 # MNIST dataset
 mnist = datasets.MNIST(
-    root='../data/', train=True, transform=img_transform, download=True)
+    root='./data/', train=True, transform=img_transform, download=True)
 test_dataset = datasets.MNIST(
-    root='../data/', train=False, transform=img_transform)
+    root='./data/', train=False, transform=img_transform)
 
 def unique_index(L,f):
     return [i for (i,value) in enumerate(L) if value==f]
