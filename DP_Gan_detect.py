@@ -198,7 +198,7 @@ for k in set_sigma:
                 fake_out = D(fake_img)
                 noise=get_noise(sigma)
                 #d_loss_fake = criterion(fake_out, fake_label)+noise
-				d_loss_fake = criterion(fake_out, fake_label)
+		d_loss_fake = criterion(fake_out, fake_label)
                 fake_scores = fake_out  # closer to 0 means better
         
                 # bp and optimize
