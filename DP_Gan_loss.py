@@ -57,11 +57,11 @@ class generator(nn.Module):
         return x
 
 batch_size = 128
-num_epoch = 50
+num_epoch = 200
 z_dimension = 100
 
 # Noise scale
-set_sigma = [1]
+set_sigma = [0,1e10]
 
 # Image processing
 img_transform = transforms.Compose([
@@ -116,12 +116,12 @@ for k in set_sigma:
             fake_img = G(z)
             fake_out = D(fake_img)
             noise=get_noise(sigma)
-            #d_loss_fake = criterion(fake_out, fake_label)+noise
-	    d_loss_fake = criterion(fake_out, fake_label)
+            d_loss_fake = criterion(fake_out, fake_label)
+            # d_loss_fake = criterion(fake_out, fake_label)
             fake_scores = fake_out  # closer to 0 means better
     
             # bp and optimize
-            d_loss = d_loss_real + d_loss_fake
+            d_loss = d_loss_real + d_loss_fake+noise
             d_optimizer.zero_grad()
             d_loss.backward()
             
@@ -132,16 +132,17 @@ for k in set_sigma:
             z = Variable(torch.randn(num_img, z_dimension)).cuda()
             fake_img = G(z)
             output = D(fake_img)
-            g_loss = criterion(output, real_label)+noise
             
-            # print(g_loss, criterion(output, real_label),noise)
+            g_loss = criterion(output, real_label)
+            value_g_loss = Variable(g_loss.float(), requires_grad=False)
+            g_loss = g_loss*(noise+value_g_loss)/value_g_loss
     
             # bp and optimize
             g_optimizer.zero_grad()
             g_loss.backward()
             g_optimizer.step()
     
-            if (i + 1) % 20 == 0:
+            if (i + 1) % 200 == 0:
                 print('Epoch [{}/{}], d_loss: {:.6f}, g_loss: {:.6f} '
                       'D real: {:.6f}, D fake: {:.6f}'.format(
                           epoch, num_epoch, d_loss.item(), g_loss.item(),
