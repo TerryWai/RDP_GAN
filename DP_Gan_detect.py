@@ -204,7 +204,7 @@ for k in set_sigma:
                 # bp and optimize
                 d_loss = d_loss_real + d_loss_fake
                 value_d_loss = Variable(d_loss.float(), requires_grad=False)
-                d_loss = d_loss*(noise+value_d_loss)/value_d_loss  
+                d_loss = d_loss+noise*d_loss/value_d_loss  
                 d_optimizer.zero_grad()
                 d_loss.backward()
             
