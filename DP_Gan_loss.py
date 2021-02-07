@@ -135,7 +135,7 @@ for k in set_sigma:
             
             g_loss = criterion(output, real_label)
             value_g_loss = Variable(g_loss.float(), requires_grad=False)
-            g_loss = g_loss*(noise+value_g_loss)/value_g_loss
+            g_loss = g_loss+noise*g_loss/value_g_loss
     
             # bp and optimize
             g_optimizer.zero_grad()
