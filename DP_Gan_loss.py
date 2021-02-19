@@ -121,7 +121,7 @@ for k in set_sigma:
             fake_scores = fake_out  # closer to 0 means better
     
             # bp and optimize
-            d_loss = d_loss_real + d_loss_fake+noise
+            d_loss = d_loss_real + d_loss_fake
             d_optimizer.zero_grad()
             d_loss.backward()
             
